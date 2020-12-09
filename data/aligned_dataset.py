@@ -2,6 +2,7 @@ import os
 from data.base_dataset import BaseDataset, get_params, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
+import numpy as np 
 
 
 class AlignedDataset(BaseDataset):
@@ -38,20 +39,36 @@ class AlignedDataset(BaseDataset):
         """
         # read a image given a random integer index
         AB_path = self.AB_paths[index]
-        AB = Image.open(AB_path).convert('RGB')
+        AB = Image.open(AB_path)
         # split AB image into A and B
         w, h = AB.size
-        w2 = int(w / 2)
+        #print (w,h, "ABSIZEEEEEEEEEEEEEEEEEEEE", AB_path)
+        w2 = int(w/2)
         A = AB.crop((0, 0, w2, h))
         B = AB.crop((w2, 0, w, h))
+        width, height = A.size
+        
+        result_A = Image.new(A.mode, (width, width), (255,255,255))
+        result_A.paste(A, (0, (width - height) // 2))
+        result_B = Image.new(B.mode, (width, width), (255,255,255))
+        result_B.paste(B, (0, (width - height) // 2))
+        #print (result_A.size)
+        #print (result_B.size)
+        if result_A.size[0] !=1280:
+            result_A = result_A.crop((0,0,1280,1280))
+            result_B = result_B.crop((0,0,1280,1280))
+        # result_A = np.array(result_A)
+        # result_B = np.array(result_B)
+        #print (result_A.size, "shpeeeee A ")
+        #print(result_B.size, "shape B")
+                # apply the same transform to both A and B
+        #transform_params = get_params(self.opt, (result_A.shape[0], result_A.shape[1]))
+        transform_params = get_params(self.opt, (result_A.size))
+        A_transform = get_transform(self.opt, transform_params, grayscale=(self.input_nc == 1),convert=True)
+        B_transform = get_transform(self.opt, transform_params, grayscale=(self.output_nc == 1), convert=True)
 
-        # apply the same transform to both A and B
-        transform_params = get_params(self.opt, A.size)
-        A_transform = get_transform(self.opt, transform_params, grayscale=(self.input_nc == 1))
-        B_transform = get_transform(self.opt, transform_params, grayscale=(self.output_nc == 1))
-
-        A = A_transform(A)
-        B = B_transform(B)
+        A = A_transform(result_A)
+        B = B_transform(result_B)
 
         return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path}
 

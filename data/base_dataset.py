@@ -95,6 +95,7 @@ def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, conve
             transform_list.append(transforms.Lambda(lambda img: __crop(img, params['crop_pos'], opt.crop_size)))
 
     if opt.preprocess == 'none':
+        #transform_list += [transforms.ToTensor()]
         transform_list.append(transforms.Lambda(lambda img: __make_power_2(img, base=4, method=method)))
 
     if not opt.no_flip:
@@ -104,15 +105,17 @@ def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, conve
             transform_list.append(transforms.Lambda(lambda img: __flip(img, params['flip'])))
 
     if convert:
+        #print("hereeeeeeeeee in covert")
         transform_list += [transforms.ToTensor()]
         if grayscale:
             transform_list += [transforms.Normalize((0.5,), (0.5,))]
         else:
-            transform_list += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+            transform_list += [transforms.Normalize((0.5, 0.5, 0.5,0.5), (0.5, 0.5, 0.5,0.5))]
     return transforms.Compose(transform_list)
 
 
 def __make_power_2(img, base, method=Image.BICUBIC):
+    
     ow, oh = img.size
     h = int(round(oh / base) * base)
     w = int(round(ow / base) * base)

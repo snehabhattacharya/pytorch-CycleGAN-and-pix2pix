@@ -338,7 +338,7 @@ class ResnetGenerator(nn.Module):
             use_bias = norm_layer == nn.InstanceNorm2d
 
         model = [nn.ReflectionPad2d(3),
-                 nn.Conv2d(input_nc, ngf, kernel_size=7, padding=0, bias=use_bias),
+                 nn.Conv2d(input_nc, ngf, kernel_size=7, padding=1, bias=use_bias),
                  norm_layer(ngf),
                  nn.ReLU(True)]
 
@@ -358,12 +358,13 @@ class ResnetGenerator(nn.Module):
             mult = 2 ** (n_downsampling - i)
             model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
                                          kernel_size=3, stride=2,
-                                         padding=1, output_padding=1,
-                                         bias=use_bias),
+                                         padding=1,
+                                         bias=use_bias,output_padding=0),
+
                       norm_layer(int(ngf * mult / 2)),
                       nn.ReLU(True)]
         model += [nn.ReflectionPad2d(3)]
-        model += [nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0)]
+        model += [nn.Conv2d(ngf, output_nc, kernel_size=7, padding=1)]
         model += [nn.Tanh()]
 
         self.model = nn.Sequential(*model)

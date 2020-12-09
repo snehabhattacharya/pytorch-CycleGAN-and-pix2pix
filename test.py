@@ -32,6 +32,9 @@ from data import create_dataset
 from models import create_model
 from util.visualizer import save_images
 from util import html
+from PIL import Image
+from util import util
+import ntpath
 
 
 if __name__ == '__main__':
@@ -63,7 +66,24 @@ if __name__ == '__main__':
         model.test()           # run inference
         visuals = model.get_current_visuals()  # get image results
         img_path = model.get_image_paths()     # get image paths
-        if i % 5 == 0:  # save images to an HTML file
-            print('processing (%04d)-th image... %s' % (i, img_path))
-        save_images(webpage, visuals, img_path, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize)
-    webpage.save()  # save the HTML
+        print (img_path)
+        image_dir = webpage.get_image_dir()
+        short_path = ntpath.basename(img_path[0])
+        name = os.path.splitext(short_path)[0]
+        for label, im_data in visuals.items():
+            im = util.tensor2im(im_data)
+            image_name = '%s_%s.png' % (label,name)
+            print(image_name)
+            save_path = os.path.join(image_dir, image_name)
+            j = Image.fromarray(im, mode='RGBA')
+            j.save(save_path)
+
+            # util.save_image(im, save_path, aspect_ratio=aspect_ratio)
+            # ims.append(image_name)
+            # txts.append(label)
+            # links.append(image_name)
+
+    #     if i % 5 == 0:  # save images to an HTML file
+    #         print('processing (%04d)-th image... %s' % (i, img_path))
+    #     save_images(webpage, visuals, img_path, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize)
+    # webpage.save()  # save the HTML
