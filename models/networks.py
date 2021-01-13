@@ -501,24 +501,40 @@ class UnetSkipConnectionBlock(nn.Module):
         uprelu = nn.ReLU(True)
         upnorm = norm_layer(outer_nc)
 
+
+        # nn.Upsample(scale_factor = 2, mode='bilinear'),
+        #                   nn.ReflectionPad2d(1),
+        #                   nn.Conv2d(ngf * mult, int(ngf * mult / 2),
+        #                                      kernel_size=3, stride=1, padding=0),
+
         if outermost:
-            upconv = nn.ConvTranspose2d(inner_nc * 2, outer_nc,
-                                        kernel_size=4, stride=2,
-                                        padding=1)
+            upconv = nn.Sequential(nn.Upsample(scale_factor = 2, mode='bilinear'),
+                          nn.ReflectionPad2d(1),
+                          nn.Conv2d(inner_nc * 2, int(outer_nc),
+                                              kernel_size=3, stride=1, padding=0))
+            # upconv = nn.ConvTranspose2d(inner_nc * 2, outer_nc,
+            #                             kernel_size=4, stride=2,
+            #                             padding=1)
             down = [downconv]
             up = [uprelu, upconv, nn.Tanh()]
             model = down + [submodule] + up
         elif innermost:
-            upconv = nn.ConvTranspose2d(inner_nc, outer_nc,
-                                        kernel_size=4, stride=2,
-                                        padding=1, bias=use_bias)
+            upconv = nn.Sequential(nn.Upsample(scale_factor = 2, mode='bilinear'),
+                          nn.ReflectionPad2d(1),
+                          nn.Conv2d(inner_nc, int(outer_nc),kernel_size=3, stride=1, padding=0))
+            # upconv = nn.ConvTranspose2d(inner_nc, outer_nc,
+            #                             kernel_size=4, stride=2,
+            #                             padding=1, bias=use_bias)
             down = [downrelu, downconv]
             up = [uprelu, upconv, upnorm]
             model = down + up
         else:
-            upconv = nn.ConvTranspose2d(inner_nc * 2, outer_nc,
-                                        kernel_size=4, stride=2,
-                                        padding=1, bias=use_bias)
+            # upconv = nn.ConvTranspose2d(inner_nc * 2, outer_nc,
+            #                             kernel_size=4, stride=2,
+            #                             padding=1, bias=use_bias)
+            upconv = nn.Sequential(nn.Upsample(scale_factor = 2, mode='bilinear'),
+                          nn.ReflectionPad2d(1),
+                          nn.Conv2d(inner_nc*2, int(outer_nc),kernel_size=3, stride=1, padding=0))
             down = [downrelu, downconv, downnorm]
             up = [uprelu, upconv, upnorm]
 

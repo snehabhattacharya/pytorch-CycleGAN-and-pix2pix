@@ -62,18 +62,18 @@ if __name__ == '__main__':
     for i, data in enumerate(dataset):
         if i >= opt.num_test:  # only apply our model to opt.num_test images.
             break
+        print(data)
         model.set_input(data)  # unpack data from data loader
         model.test()           # run inference
         visuals = model.get_current_visuals()  # get image results
         img_path = model.get_image_paths()     # get image paths
-        print (img_path)
         image_dir = webpage.get_image_dir()
         short_path = ntpath.basename(img_path[0])
         name = os.path.splitext(short_path)[0]
         for label, im_data in visuals.items():
             im = util.tensor2im(im_data)
             image_name = '%s_%s.png' % (label,name)
-            print(image_name)
+            #print(image_name)
             save_path = os.path.join(image_dir, image_name)
             j = Image.fromarray(im, mode='RGBA')
             j.save(save_path)
